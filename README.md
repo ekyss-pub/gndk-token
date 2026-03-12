@@ -1,5 +1,10 @@
 # GNDK Token — Solana Smart Contracts
 
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Solana](https://img.shields.io/badge/Solana-v3.1-blueviolet)](https://solana.com)
+[![Anchor](https://img.shields.io/badge/Anchor-0.32.1-orange)](https://www.anchor-lang.com)
+[![Tests](https://img.shields.io/badge/tests-40%2F40-brightgreen)](#test)
+
 > On-chain tokenomics for **eKYSS Learn-to-Earn** ecosystem on Solana.
 
 GNDK is a fixed-supply (1B) SPL Token with Dynamic Halving, dual reward pools, BurnRecycle deflation, and time-locked vesting — designed for sustainable Learn-to-Earn economics.
@@ -159,9 +164,15 @@ gndk-token/
 - Vesting revoke returns only unvested tokens; vested amounts are protected
 - BurnRecycle ratio (50/50) is hardcoded — not admin-configurable
 
+## Security
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting guidelines.
+
+These contracts have **not yet been formally audited**. Audit is planned before mainnet deployment.
+
 ## License
 
-ISC
+Apache-2.0 — see [LICENSE](LICENSE)
 
 ## Links
 
