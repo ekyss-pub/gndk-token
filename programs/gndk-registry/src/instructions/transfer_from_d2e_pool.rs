@@ -18,6 +18,13 @@ pub fn handler(ctx: Context<TransferFromD2EPool>, amount: u64) -> Result<()> {
     let config = &ctx.accounts.config;
     require!(!config.global_pause, GndkError::ProgramPaused);
 
+    // 0. caller 권한 검증 (C-1 fix)
+    let caller_key = ctx.accounts.caller.key();
+    require!(
+        caller_key == config.admin || caller_key == config.oracle,
+        GndkError::Unauthorized
+    );
+
     // 1. 모듈 검증
     let module = &mut ctx.accounts.module_account;
     require!(module.is_active, GndkError::ModuleInactive);
@@ -124,7 +131,12 @@ pub struct TransferFromD2EPool<'info> {
     )]
     pub d2e_pool_authority: Account<'info, D2EPoolAuthority>,
 
-    #[account(mut)]
+    /// C-7 fix: d2e_pool_ata의 authority + mint 검증
+    #[account(
+        mut,
+        token::mint = mint,
+        token::authority = d2e_pool_authority,
+    )]
     pub d2e_pool_ata: InterfaceAccount<'info, TokenAccount>,
 
     pub mint: InterfaceAccount<'info, Mint>,
@@ -136,10 +148,15 @@ pub struct TransferFromD2EPool<'info> {
     )]
     pub user_account: Account<'info, UserAccount>,
 
-    #[account(mut)]
+    /// C-2 fix: user_ata 소유자 + mint 검증
+    #[account(
+        mut,
+        token::mint = mint,
+        token::authority = user_account.owner,
+    )]
     pub user_ata: InterfaceAccount<'info, TokenAccount>,
 
-    /// 모듈의 PDA 또는 admin이 서명
+    /// C-1 fix: admin 또는 oracle만 호출 가능 (handler에서 검증)
     pub caller: Signer<'info>,
 
     pub token_program: Interface<'info, TokenInterface>,

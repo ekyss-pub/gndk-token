@@ -27,13 +27,13 @@ pub mod burn_recycle {
     use super::*;
 
     /// BurnRecycle 초기화
+    /// C-9 fix: mint를 Account로 받아 실제 Mint 계정인지 검증
     pub fn initialize(
         ctx: Context<Initialize>,
-        mint: Pubkey,
     ) -> Result<()> {
         let config = &mut ctx.accounts.config;
         config.admin = ctx.accounts.admin.key();
-        config.mint = mint;
+        config.mint = ctx.accounts.mint.key();
         config.total_burned = 0;
         config.total_recycled = 0;
         config.total_admin_burned = 0;
@@ -199,6 +199,9 @@ pub struct Initialize<'info> {
     )]
     pub config: Account<'info, BurnRecycleConfig>,
 
+    /// C-9 fix: mint를 실제 Account로 받아 Mint 타입 검증
+    pub mint: InterfaceAccount<'info, Mint>,
+
     #[account(mut)]
     pub admin: Signer<'info>,
 
@@ -214,15 +217,16 @@ pub struct ProcessPayment<'info> {
     )]
     pub config: Account<'info, BurnRecycleConfig>,
 
-    #[account(mut)]
+    /// C-3 fix: mint가 config.mint과 일치하는지 검증
+    #[account(mut, constraint = mint.key() == config.mint @ BurnRecycleError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
-    /// 결제자의 GNDK 토큰 계정
-    #[account(mut)]
+    /// C-3 fix: payer_ata의 mint 검증
+    #[account(mut, token::mint = mint)]
     pub payer_ata: InterfaceAccount<'info, TokenAccount>,
 
-    /// RewardPool ATA (리사이클 대상 — transfer TO이므로 authority 불필요)
-    #[account(mut)]
+    /// C-3 fix: reward_pool_ata의 mint 검증
+    #[account(mut, token::mint = mint)]
     pub reward_pool_ata: InterfaceAccount<'info, TokenAccount>,
 
     /// 결제자 (서명)
@@ -241,11 +245,12 @@ pub struct AdminBurn<'info> {
     )]
     pub config: Account<'info, BurnRecycleConfig>,
 
-    #[account(mut)]
+    /// C-3 fix: mint 검증
+    #[account(mut, constraint = mint.key() == config.mint @ BurnRecycleError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
-    /// Admin의 GNDK 토큰 계정
-    #[account(mut)]
+    /// C-3 fix: admin_ata mint 검증
+    #[account(mut, token::mint = mint)]
     pub admin_ata: InterfaceAccount<'info, TokenAccount>,
 
     #[account(mut)]
@@ -278,4 +283,7 @@ pub enum BurnRecycleError {
 
     #[msg("Arithmetic overflow")]
     Overflow,
+
+    #[msg("Mint does not match config")]
+    MintMismatch,
 }

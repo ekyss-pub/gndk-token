@@ -408,12 +408,12 @@ pub struct CreateVesting<'info> {
     /// CHECK: 수혜자 pubkey
     pub beneficiary: UncheckedAccount<'info>,
 
-    /// Vault ATA (토큰 보관)
-    #[account(mut)]
+    /// C-6 fix: vault_ata mint 검증
+    #[account(mut, token::mint = mint)]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
-    /// Admin의 토큰 계정 (입금 소스)
-    #[account(mut)]
+    /// C-6 fix: admin_ata mint 검증
+    #[account(mut, token::mint = mint)]
     pub admin_ata: InterfaceAccount<'info, TokenAccount>,
 
     pub mint: InterfaceAccount<'info, Mint>,
@@ -447,13 +447,18 @@ pub struct Claim<'info> {
     )]
     pub vault_authority: Account<'info, VaultAuthority>,
 
-    #[account(mut)]
+    /// C-6 fix: vault_ata mint 검증
+    #[account(mut, token::mint = mint)]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
     pub mint: InterfaceAccount<'info, Mint>,
 
-    /// 수혜자의 토큰 계정
-    #[account(mut)]
+    /// C-5 fix: beneficiary_ata 소유자 + mint 검증
+    #[account(
+        mut,
+        token::mint = mint,
+        token::authority = beneficiary,
+    )]
     pub beneficiary_ata: InterfaceAccount<'info, TokenAccount>,
 
     /// 수혜자 (서명)
@@ -484,13 +489,14 @@ pub struct Revoke<'info> {
     )]
     pub vault_authority: Account<'info, VaultAuthority>,
 
-    #[account(mut)]
+    /// C-6 fix: vault_ata mint 검증
+    #[account(mut, token::mint = mint)]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
     pub mint: InterfaceAccount<'info, Mint>,
 
-    /// Admin의 토큰 계정 (미해제분 반환)
-    #[account(mut)]
+    /// C-6 fix: admin_ata mint 검증
+    #[account(mut, token::mint = mint)]
     pub admin_ata: InterfaceAccount<'info, TokenAccount>,
 
     #[account(mut)]

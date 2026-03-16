@@ -23,6 +23,13 @@ pub fn handler(ctx: Context<TransferFromPool>, amount: u64) -> Result<()> {
     let config = &ctx.accounts.config;
     require!(!config.global_pause, GndkError::ProgramPaused);
 
+    // 0. caller 권한 검증 (C-1 fix: admin 또는 oracle만 호출 가능)
+    let caller_key = ctx.accounts.caller.key();
+    require!(
+        caller_key == config.admin || caller_key == config.oracle,
+        GndkError::Unauthorized
+    );
+
     // 1. 모듈 검증
     let module = &mut ctx.accounts.module_account;
     require!(module.is_active, GndkError::ModuleInactive);
@@ -125,7 +132,12 @@ pub struct TransferFromPool<'info> {
     )]
     pub pool_authority: Account<'info, RewardPoolAuthority>,
 
-    #[account(mut)]
+    /// C-7 fix: reward_pool_ata의 authority + mint 검증
+    #[account(
+        mut,
+        token::mint = mint,
+        token::authority = pool_authority,
+    )]
     pub reward_pool_ata: InterfaceAccount<'info, TokenAccount>,
 
     pub mint: InterfaceAccount<'info, Mint>,
@@ -137,10 +149,15 @@ pub struct TransferFromPool<'info> {
     )]
     pub user_account: Account<'info, UserAccount>,
 
-    #[account(mut)]
+    /// C-2 fix: user_ata가 실제 user_account.owner의 토큰 계정인지 + mint 일치 검증
+    #[account(
+        mut,
+        token::mint = mint,
+        token::authority = user_account.owner,
+    )]
     pub user_ata: InterfaceAccount<'info, TokenAccount>,
 
-    /// 모듈의 PDA 또는 admin이 서명
+    /// C-1 fix: admin 또는 oracle만 호출 가능 (handler에서 검증)
     pub caller: Signer<'info>,
 
     pub token_program: Interface<'info, TokenInterface>,

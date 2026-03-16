@@ -11,12 +11,18 @@ l2e_module = "Ed1GRcVHtXq1fJxwN8SC7rWjmwC4S6kVRGoXKkmv6AkS"
 burn_recycle = "EV5A8bfAyqYqgscwd2PRoHfTqPg9w7Uxuwgmo4TTYzXp"
 vesting_program = "6w23izAP5v6WzqA9eAgb96WvWtckKbquhKbPfXmgMwok"
 
+[programs.devnet]
+gndk_registry = "6SZBJmypA1eC6R8C8iPXSRZevwT5bFPuAEcBbSrk1srw"
+l2e_module = "Ed1GRcVHtXq1fJxwN8SC7rWjmwC4S6kVRGoXKkmv6AkS"
+burn_recycle = "EV5A8bfAyqYqgscwd2PRoHfTqPg9w7Uxuwgmo4TTYzXp"
+vesting_program = "6w23izAP5v6WzqA9eAgb96WvWtckKbquhKbPfXmgMwok"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
 cluster = "localnet"
-wallet = "~/.config/solana/id.json"
+wallet = "~/dev/solana/dev-wallet.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 \"tests/**/*.ts\""

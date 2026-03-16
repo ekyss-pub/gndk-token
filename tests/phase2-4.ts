@@ -314,9 +314,9 @@ describe("GNDK Phase 2-4 — L2E Module, BurnRecycle, Vesting", () => {
   // ═══════════════════════════════════════
 
   it("I1. Initialize BurnRecycle", async () => {
-    await burnRecycle.methods.initialize(mint)
+    await burnRecycle.methods.initialize()
       .accounts({
-        config: burnConfigPda, admin: admin.publicKey,
+        config: burnConfigPda, mint, admin: admin.publicKey,
         systemProgram: SystemProgram.programId,
       }).rpc();
 
