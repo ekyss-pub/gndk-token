@@ -30,10 +30,12 @@ pub mod burn_recycle {
     /// C-9 fix: mint를 Account로 받아 실제 Mint 계정인지 검증
     pub fn initialize(
         ctx: Context<Initialize>,
+        reward_pool_ata: Pubkey,
     ) -> Result<()> {
         let config = &mut ctx.accounts.config;
         config.admin = ctx.accounts.admin.key();
         config.mint = ctx.accounts.mint.key();
+        config.reward_pool_ata = reward_pool_ata;
         config.total_burned = 0;
         config.total_recycled = 0;
         config.total_admin_burned = 0;
@@ -51,6 +53,7 @@ pub mod burn_recycle {
     pub fn process_payment(ctx: Context<ProcessPayment>, amount: u64) -> Result<()> {
         let config = &ctx.accounts.config;
         require!(config.is_active, BurnRecycleError::ProgramPaused);
+        require!(amount > 0, BurnRecycleError::ZeroAmount);
 
         let total_raw = amount
             .checked_mul(DECIMALS_FACTOR)
@@ -113,6 +116,7 @@ pub mod burn_recycle {
     pub fn admin_burn(ctx: Context<AdminBurn>, amount: u64) -> Result<()> {
         let config = &ctx.accounts.config;
         require!(config.is_active, BurnRecycleError::ProgramPaused);
+        require!(amount > 0, BurnRecycleError::ZeroAmount);
         require!(
             ctx.accounts.admin.key() == config.admin,
             BurnRecycleError::Unauthorized
@@ -174,16 +178,17 @@ pub mod burn_recycle {
 pub struct BurnRecycleConfig {
     pub admin: Pubkey,             // 32
     pub mint: Pubkey,              // 32
+    pub reward_pool_ata: Pubkey,   // 32 — GSA-03 fix: authorized reward pool ATA
     pub total_burned: u64,         // 8 — 누적 소각 (raw)
     pub total_recycled: u64,       // 8 — 누적 리사이클 (raw)
     pub total_admin_burned: u64,   // 8 — admin_burn 누적 (raw)
     pub is_active: bool,           // 1
     pub bump: u8,                  // 1
 }
-// space: 8 + 32 + 32 + 8 + 8 + 8 + 1 + 1 = 98
+// space: 8 + 32 + 32 + 32 + 8 + 8 + 8 + 1 + 1 = 130
 
 impl BurnRecycleConfig {
-    pub const SIZE: usize = 8 + 32 + 32 + 8 + 8 + 8 + 1 + 1; // 98
+    pub const SIZE: usize = 8 + 32 + 32 + 32 + 8 + 8 + 8 + 1 + 1; // 130
 }
 
 // ─── Instructions ───
@@ -221,12 +226,16 @@ pub struct ProcessPayment<'info> {
     #[account(mut, constraint = mint.key() == config.mint @ BurnRecycleError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
-    /// C-3 fix: payer_ata의 mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-3 fix: payer_ata mint 검증 + GSA-09 fix: authority 검증
+    #[account(mut, token::mint = mint, token::authority = payer)]
     pub payer_ata: InterfaceAccount<'info, TokenAccount>,
 
-    /// C-3 fix: reward_pool_ata의 mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-3 + GSA-03 fix: reward_pool_ata의 mint 검증 + config에 등록된 주소 검증
+    #[account(
+        mut,
+        token::mint = mint,
+        constraint = reward_pool_ata.key() == config.reward_pool_ata @ BurnRecycleError::InvalidRewardPool,
+    )]
     pub reward_pool_ata: InterfaceAccount<'info, TokenAccount>,
 
     /// 결제자 (서명)
@@ -249,8 +258,8 @@ pub struct AdminBurn<'info> {
     #[account(mut, constraint = mint.key() == config.mint @ BurnRecycleError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
-    /// C-3 fix: admin_ata mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-3 fix: admin_ata mint 검증 + GSA-09 fix: authority 검증
+    #[account(mut, token::mint = mint, token::authority = admin)]
     pub admin_ata: InterfaceAccount<'info, TokenAccount>,
 
     #[account(mut)]
@@ -286,4 +295,10 @@ pub enum BurnRecycleError {
 
     #[msg("Mint does not match config")]
     MintMismatch,
+
+    #[msg("Amount must be greater than zero")]
+    ZeroAmount,
+
+    #[msg("Reward pool ATA does not match config")]
+    InvalidRewardPool,
 }

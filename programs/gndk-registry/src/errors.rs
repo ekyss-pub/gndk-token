@@ -44,4 +44,7 @@ pub enum GndkError {
 
     #[msg("Pool type mismatch")]
     PoolTypeMismatch,
+
+    #[msg("Mint does not match config")]
+    MintMismatch,
 }

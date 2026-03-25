@@ -11,13 +11,15 @@ use crate::state::*;
 // transfer_from_pool — L2E RewardPool에서 사용자에게 전송
 // ═══════════════════════════════════════════════════════════════
 //
-// CPI로만 호출 가능 (등록된 활성 L2E 모듈만)
+// 호출 모델: admin/oracle 권한 + 등록된 활성 모듈 컨텍스트 필수
+// 모듈(L2E 등)이 CPI로 호출하며, caller는 모듈의 oracle/admin이 전달됨
 // 검증:
-//   1. 글로벌 pause + 모듈 pause
-//   2. 모듈 등록 + 활성 + pool_type == L2E
-//   3. 모듈 일일 한도
-//   4. 유저 L2E 연간 한도 (Dynamic Halving Phase cap)
-//   5. 토큰 전송
+//   1. caller가 config.admin 또는 config.oracle인지 확인
+//   2. 글로벌 pause + 모듈 pause
+//   3. 모듈 등록 + 활성 + pool_type == L2E
+//   4. 모듈 일일 한도
+//   5. 유저 L2E 연간 한도 (Dynamic Halving Phase cap)
+//   6. 토큰 전송
 
 pub fn handler(ctx: Context<TransferFromPool>, amount: u64) -> Result<()> {
     let config = &ctx.accounts.config;
@@ -140,6 +142,8 @@ pub struct TransferFromPool<'info> {
     )]
     pub reward_pool_ata: InterfaceAccount<'info, TokenAccount>,
 
+    /// GSA-07 fix: mint가 config.mint과 일치하는지 검증
+    #[account(constraint = mint.key() == config.mint @ GndkError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(

@@ -130,12 +130,13 @@ pub mod vesting_program {
             ctx.accounts.beneficiary.key() == vesting.beneficiary,
             VestingError::Unauthorized
         );
-        require!(!vesting.revoked, VestingError::VestingRevoked);
 
         let clock = Clock::get()?;
         let now = clock.unix_timestamp;
 
         // 해제 가능 금액 계산
+        // GSA-04 fix: revoke 후에도 vested-but-unclaimed 토큰 인출 허용
+        // revoke 시 total_amount이 vested로 줄어들므로 추가 accrual 없음
         let vested = calc_vested_amount(vesting, now);
         let claimable = vested
             .checked_sub(vesting.claimed_amount)
@@ -377,6 +378,8 @@ pub struct InitializeVault<'info> {
     )]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
+    /// GSA-05 fix: mint가 config.mint과 일치하는지 검증
+    #[account(constraint = mint.key() == config.mint @ VestingError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(mut)]
@@ -408,15 +411,24 @@ pub struct CreateVesting<'info> {
     /// CHECK: 수혜자 pubkey
     pub beneficiary: UncheckedAccount<'info>,
 
-    /// C-6 fix: vault_ata mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-6 + GSA-09 fix: vault_ata mint + authority 검증
+    #[account(mut, token::mint = mint, token::authority = vault_authority)]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
-    /// C-6 fix: admin_ata mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-6 + GSA-09 fix: admin_ata mint + authority 검증
+    #[account(mut, token::mint = mint, token::authority = admin)]
     pub admin_ata: InterfaceAccount<'info, TokenAccount>,
 
+    /// GSA-05 fix: mint가 config.mint과 일치하는지 검증
+    #[account(constraint = mint.key() == config.mint @ VestingError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
+
+    /// GSA-09 fix: CreateVesting에 vault_authority 추가
+    #[account(
+        seeds = [b"vesting_vault", config.mint.as_ref()],
+        bump = vault_authority.bump,
+    )]
+    pub vault_authority: Account<'info, VaultAuthority>,
 
     #[account(mut)]
     pub admin: Signer<'info>,
@@ -447,10 +459,12 @@ pub struct Claim<'info> {
     )]
     pub vault_authority: Account<'info, VaultAuthority>,
 
-    /// C-6 fix: vault_ata mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-6 + GSA-09 fix: vault_ata mint + authority 검증
+    #[account(mut, token::mint = mint, token::authority = vault_authority)]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
+    /// GSA-05 fix: mint가 config.mint과 일치하는지 검증
+    #[account(constraint = mint.key() == config.mint @ VestingError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
     /// C-5 fix: beneficiary_ata 소유자 + mint 검증
@@ -489,14 +503,16 @@ pub struct Revoke<'info> {
     )]
     pub vault_authority: Account<'info, VaultAuthority>,
 
-    /// C-6 fix: vault_ata mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-6 + GSA-09 fix: vault_ata mint + authority 검증
+    #[account(mut, token::mint = mint, token::authority = vault_authority)]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
 
+    /// GSA-05 fix: mint가 config.mint과 일치하는지 검증
+    #[account(constraint = mint.key() == config.mint @ VestingError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
-    /// C-6 fix: admin_ata mint 검증
-    #[account(mut, token::mint = mint)]
+    /// C-6 + GSA-09 fix: admin_ata mint + authority 검증
+    #[account(mut, token::mint = mint, token::authority = admin)]
     pub admin_ata: InterfaceAccount<'info, TokenAccount>,
 
     #[account(mut)]
@@ -529,4 +545,7 @@ pub enum VestingError {
 
     #[msg("Arithmetic overflow")]
     Overflow,
+
+    #[msg("Mint does not match config")]
+    MintMismatch,
 }

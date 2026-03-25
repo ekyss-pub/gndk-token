@@ -11,8 +11,8 @@ use crate::state::*;
 // transfer_from_d2e_pool — D2E Bounty Pool에서 사용자에게 전송
 // ═══════════════════════════════════════════════════════════════
 //
-// L2E와 독립된 한도 체계
-// D2E 모듈만 호출 가능 (pool_type == D2E)
+// 호출 모델: admin/oracle 권한 + 등록된 활성 D2E 모듈 컨텍스트 필수
+// L2E와 독립된 한도 체계 (pool_type == D2E)
 
 pub fn handler(ctx: Context<TransferFromD2EPool>, amount: u64) -> Result<()> {
     let config = &ctx.accounts.config;
@@ -139,6 +139,8 @@ pub struct TransferFromD2EPool<'info> {
     )]
     pub d2e_pool_ata: InterfaceAccount<'info, TokenAccount>,
 
+    /// GSA-07 fix: mint가 config.mint과 일치하는지 검증
+    #[account(constraint = mint.key() == config.mint @ GndkError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(

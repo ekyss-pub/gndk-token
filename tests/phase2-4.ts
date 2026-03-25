@@ -314,7 +314,7 @@ describe("GNDK Phase 2-4 — L2E Module, BurnRecycle, Vesting", () => {
   // ═══════════════════════════════════════
 
   it("I1. Initialize BurnRecycle", async () => {
-    await burnRecycle.methods.initialize()
+    await burnRecycle.methods.initialize(poolAta)
       .accounts({
         config: burnConfigPda, mint, admin: admin.publicKey,
         systemProgram: SystemProgram.programId,
@@ -437,6 +437,7 @@ describe("GNDK Phase 2-4 — L2E Module, BurnRecycle, Vesting", () => {
       config: vestingConfigPda, vestingAccount: vestingAccountPda,
       beneficiary: beneficiary.publicKey, vaultAta,
       adminAta: vestingAdminAta, mint: vestingMint,
+      vaultAuthority: vaultAuthorityPda,
       admin: admin.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID, systemProgram: SystemProgram.programId,
     }).rpc();
@@ -541,6 +542,7 @@ describe("GNDK Phase 2-4 — L2E Module, BurnRecycle, Vesting", () => {
       config: vestingConfigPda, vestingAccount: revokeVestingPda,
       beneficiary: revokeBeneficiary.publicKey, vaultAta,
       adminAta: vestingAdminAta, mint: vestingMint,
+      vaultAuthority: vaultAuthorityPda,
       admin: admin.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID, systemProgram: SystemProgram.programId,
     }).rpc();
