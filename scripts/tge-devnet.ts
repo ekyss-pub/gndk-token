@@ -297,9 +297,10 @@ async function main() {
   await l2e.methods.initialize()
     .accounts({
       l2eConfig: l2eConfigPda, oracle: oracle.publicKey,
+      mint: mint,
       admin: adminPubkey, systemProgram: SystemProgram.programId,
     }).rpc();
-  console.log("  ✅ L2E Module initialized");
+  console.log("  ✅ L2E Module initialized — mint bound");
 
   // Register L2E Module in Registry (daily=10000 GNDK, annual=0 → Phase cap applies)
   await registry.methods.registerModule("l2e-module", 0, new anchor.BN(10000), new anchor.BN(0))

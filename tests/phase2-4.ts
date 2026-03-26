@@ -169,14 +169,16 @@ describe("GNDK Phase 2-4 — L2E Module, BurnRecycle, Vesting", () => {
     await l2e.methods.initialize()
       .accounts({
         l2eConfig: l2eConfigPda, oracle: oracle.publicKey,
+        mint: mint,
         admin: admin.publicKey, systemProgram: SystemProgram.programId,
       }).rpc();
 
     const config = await l2e.account.l2EConfig.fetch(l2eConfigPda);
     assert.equal(config.admin.toBase58(), admin.publicKey.toBase58());
     assert.equal(config.oracle.toBase58(), oracle.publicKey.toBase58());
+    assert.equal(config.mint.toBase58(), mint.toBase58());
     assert.equal(config.isActive, true);
-    console.log("    ✅ L2E Module initialized");
+    console.log("    ✅ L2E Module initialized — mint bound: " + mint.toBase58());
   });
 
   it("H2. Register L2E Module in Registry", async () => {

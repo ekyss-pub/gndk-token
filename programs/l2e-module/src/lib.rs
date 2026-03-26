@@ -23,16 +23,17 @@ declare_id!("Ed1GRcVHtXq1fJxwN8SC7rWjmwC4S6kVRGoXKkmv6AkS");
 pub mod l2e_module {
     use super::*;
 
-    /// L2E Config 초기화 — admin, registry 연결
+    /// L2E Config 초기화 — admin, registry 연결, mint 바인딩
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         let l2e_config = &mut ctx.accounts.l2e_config;
         l2e_config.admin = ctx.accounts.admin.key();
         l2e_config.oracle = ctx.accounts.oracle.key();
+        l2e_config.mint = ctx.accounts.mint.key();
         l2e_config.is_active = true;
         l2e_config.total_distributed = 0;
         l2e_config.bump = ctx.bumps.l2e_config;
 
-        msg!("L2E Module initialized");
+        msg!("L2E Module initialized — mint: {}", l2e_config.mint);
         Ok(())
     }
 
@@ -119,14 +120,15 @@ pub mod l2e_module {
 pub struct L2EConfig {
     pub admin: Pubkey,            // 32
     pub oracle: Pubkey,           // 32
+    pub mint: Pubkey,             // 32 — GSA-11: bound token mint
     pub is_active: bool,          // 1
     pub total_distributed: u64,   // 8
     pub bump: u8,                 // 1
 }
-// space: 8 + 32 + 32 + 1 + 8 + 1 = 82
+// space: 8 + 32 + 32 + 32 + 1 + 8 + 1 = 114
 
 impl L2EConfig {
-    pub const SIZE: usize = 8 + 32 + 32 + 1 + 8 + 1; // 82
+    pub const SIZE: usize = 8 + 32 + 32 + 32 + 1 + 8 + 1; // 114
 }
 
 // ─── Instructions ───
@@ -144,6 +146,9 @@ pub struct Initialize<'info> {
 
     /// CHECK: oracle pubkey
     pub oracle: UncheckedAccount<'info>,
+
+    /// GNDK Mint — bound at init, validated on every distribute
+    pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(mut)]
     pub admin: Signer<'info>,
@@ -180,7 +185,8 @@ pub struct Distribute<'info> {
     #[account(mut)]
     pub reward_pool_ata: InterfaceAccount<'info, TokenAccount>,
 
-    /// GNDK Mint
+    /// GNDK Mint — must match the mint bound at initialization (GSA-11)
+    #[account(constraint = mint.key() == l2e_config.mint @ L2EError::MintMismatch)]
     pub mint: InterfaceAccount<'info, Mint>,
 
     /// User account in Registry
@@ -223,4 +229,7 @@ pub enum L2EError {
 
     #[msg("Arithmetic overflow")]
     Overflow,
+
+    #[msg("Mint mismatch: expected the mint bound at initialization")]
+    MintMismatch,
 }

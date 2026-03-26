@@ -159,7 +159,7 @@ describe("Devnet TGE Scenarios — Full Ecosystem Test", () => {
     [l2eModulePda] = PublicKey.findProgramAddressSync([Buffer.from("module"), l2e.programId.toBuffer()], registry.programId);
 
     await l2e.methods.initialize()
-      .accounts({ l2eConfig: l2eConfigPda, oracle: oracle.publicKey, admin: admin.publicKey, systemProgram: SystemProgram.programId })
+      .accounts({ l2eConfig: l2eConfigPda, oracle: oracle.publicKey, mint: mint, admin: admin.publicKey, systemProgram: SystemProgram.programId })
       .rpc();
 
     await registry.methods.registerModule("l2e-mod", 0, new anchor.BN(50000), new anchor.BN(0))
