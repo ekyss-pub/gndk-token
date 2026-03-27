@@ -177,4 +177,4 @@ Apache-2.0 — see [LICENSE](LICENSE)
 ## Links
 
 - Website: [gndtoken.com](https://gndtoken.com)
-- eKYSS Platform: [ekyss.com](https://ekyss.com)
+- eKYSS Platform: [ekyss.co.kr](https://ekyss.co.kr)
