@@ -63,10 +63,16 @@ pub fn handler(ctx: Context<TransferFromPool>, amount: u64) -> Result<()> {
     }
 
     let phase_cap = PHASE_CAPS[config.current_phase as usize];
+    // GSA-15: enforce module.annual_limit alongside phase cap
+    let effective_cap = if module.annual_limit > 0 {
+        phase_cap.min(module.annual_limit)
+    } else {
+        phase_cap
+    };
     let new_l2e = user_account.l2e_annual_claimed
         .checked_add(amount)
         .ok_or(GndkError::Overflow)?;
-    require!(new_l2e <= phase_cap, GndkError::L2EAnnualLimitExceeded);
+    require!(new_l2e <= effective_cap, GndkError::L2EAnnualLimitExceeded);
 
     // 4. 토큰 전송 (GNDK 단위 → lamports)
     let transfer_amount = amount

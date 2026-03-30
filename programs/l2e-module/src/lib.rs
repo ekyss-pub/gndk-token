@@ -174,8 +174,11 @@ pub struct Distribute<'info> {
     #[account(mut)]
     pub registry_config: Account<'info, ConfigAccount>,
 
-    /// L2E ModuleAccount in Registry
-    #[account(mut)]
+    /// L2E ModuleAccount in Registry — GSA-13: bind to this program
+    #[account(
+        mut,
+        constraint = module_account.program_id == crate::ID @ L2EError::ModuleMismatch
+    )]
     pub module_account: Account<'info, ModuleAccount>,
 
     /// RewardPool authority PDA
@@ -232,4 +235,7 @@ pub enum L2EError {
 
     #[msg("Mint mismatch: expected the mint bound at initialization")]
     MintMismatch,
+
+    #[msg("Module mismatch: supplied ModuleAccount does not belong to this program")]
+    ModuleMismatch,
 }

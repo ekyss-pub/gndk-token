@@ -259,6 +259,11 @@ pub mod vesting_program {
 
 /// 현재 시점까지 해제된(vested) GNDK 금액 계산
 fn calc_vested_amount(vesting: &VestingAccount, now: i64) -> u64 {
+    // GSA-16: revoked schedule has total_amount already snapshotted to vested amount
+    if vesting.revoked {
+        return vesting.total_amount;
+    }
+
     if now < vesting.cliff_end {
         // Cliff 이전: 0
         return 0;
