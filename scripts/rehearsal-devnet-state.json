@@ -1,0 +1,24 @@
+{
+  "network": "https://api.devnet.solana.com",
+  "rehearsal": true,
+  "timestamp": "2026-09-22T02:07:39.329Z",
+  "vestingProgramId": "2H2nr7E2F4CFPEwacmAwtBu5YXjF5LjqrMXyt2phQWMq",
+  "mint": "FHcjQnzYZgyLB8CUUneSYooifrvu3STwgL7PTB8D6o7N",
+  "vaultAta": "9cvFTUuEJEx5HS5Ln1GkSdY5fABUixE4xABUgkjaAkU3",
+  "vestingAccounts": {
+    "earlyContrib": {
+      "pda": "4fN67X45tnRecBY6TivgunGU41TutRrsMmWe1EHU9bhB",
+      "beneficiary": "B18LGHX2B6uHjKLJtoTk8dbjDxYEYSkre8TVx6fXwcd3",
+      "amount": 100000000,
+      "cliffYears": 1,
+      "linearYears": 1
+    },
+    "privateSale": {
+      "pda": "9LcpgpTkUQcmzPzZeQhfUDq3J64WHg6CkRpQCWDWXzzE",
+      "beneficiary": "FQbW9keYB9t59gv1HUJaw5kBmEVGmotkEYqZr2P5hmRK",
+      "amount": 100000000,
+      "cliffYears": 1,
+      "linearYears": 1
+    }
+  }
+}
