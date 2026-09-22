@@ -10,3 +10,10 @@ test-ledger
 *-keypair.json
 *.pem
 DEV_STATE.md
+
+# deployment state / run logs (contain oracle secrets or local paths)
+scripts/tge-*-state.json
+scripts/reallocation-*.json
+# internal operator docs
+docs/ceo-handover-email.md
+docs/mainnet-deploy-checklist.html

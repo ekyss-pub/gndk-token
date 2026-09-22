@@ -3,7 +3,7 @@ use anchor_spl::token_interface::{
     self, Burn, Mint, TokenAccount, TokenInterface, TransferChecked,
 };
 
-declare_id!("EV5A8bfAyqYqgscwd2PRoHfTqPg9w7Uxuwgmo4TTYzXp");
+declare_id!("7iTHn5VfdbuB6iZMRMWEEcvsDZ6tp4PJc2LSApkGsEKt");
 
 // ═══════════════════════════════════════════════════════════════
 // GNDK BurnRecycle — Service Payment Processing

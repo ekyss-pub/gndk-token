@@ -7,7 +7,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("6SZBJmypA1eC6R8C8iPXSRZevwT5bFPuAEcBbSrk1srw");
+declare_id!("32i3NpTZBAULDBgvPB4nyY48LpEW6LBXJ3uzsHdE8uWN");
 
 // ═══════════════════════════════════════════════════════════════
 // GNDK Registry — Core Program

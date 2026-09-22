@@ -8,7 +8,7 @@ use gndk_registry::state::{
     ConfigAccount, ModuleAccount, RewardPoolAuthority, UserAccount,
 };
 
-declare_id!("Ed1GRcVHtXq1fJxwN8SC7rWjmwC4S6kVRGoXKkmv6AkS");
+declare_id!("HpisvtB1A5d7RYFn9QviVVgeYUhEk31G1o9moxPHcSAU");
 
 // ═══════════════════════════════════════════════════════════════
 // GNDK L2E Module — Learn-to-Earn

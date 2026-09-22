@@ -3,7 +3,7 @@ use anchor_spl::token_interface::{
     self, Mint, TokenAccount, TokenInterface, TransferChecked,
 };
 
-declare_id!("6w23izAP5v6WzqA9eAgb96WvWtckKbquhKbPfXmgMwok");
+declare_id!("2H2nr7E2F4CFPEwacmAwtBu5YXjF5LjqrMXyt2phQWMq");
 
 // ═══════════════════════════════════════════════════════════════
 // GNDK Vesting — Cliff + Linear Unlock

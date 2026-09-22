@@ -17,6 +17,12 @@ l2e_module = "Ed1GRcVHtXq1fJxwN8SC7rWjmwC4S6kVRGoXKkmv6AkS"
 burn_recycle = "EV5A8bfAyqYqgscwd2PRoHfTqPg9w7Uxuwgmo4TTYzXp"
 vesting_program = "6w23izAP5v6WzqA9eAgb96WvWtckKbquhKbPfXmgMwok"
 
+[programs.mainnet]
+gndk_registry = "32i3NpTZBAULDBgvPB4nyY48LpEW6LBXJ3uzsHdE8uWN"
+l2e_module = "HpisvtB1A5d7RYFn9QviVVgeYUhEk31G1o9moxPHcSAU"
+burn_recycle = "7iTHn5VfdbuB6iZMRMWEEcvsDZ6tp4PJc2LSApkGsEKt"
+vesting_program = "2H2nr7E2F4CFPEwacmAwtBu5YXjF5LjqrMXyt2phQWMq"
+
 [registry]
 url = "https://api.apr.dev"
 
